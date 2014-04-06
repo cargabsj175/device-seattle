@@ -1,7 +1,11 @@
-$(call inherit-product, $(SRC_TARGET_DIR)/product/languages_full.mk)
+include device/qcom/msm7627a/msm7627a.mk
 
-# Release name
-PRODUCT_RELEASE_NAME := seattle
+# wifi modules
+ifneq (linux,$(HOST_OS))
+PRODUCT_COPY_FILES += \
+  device/siragon/seattle/prebuilt/cfg80211.ko:system/lib/modules/ath6kl/cfg80211.ko \
+  device/siragon/seattle/prebuilt/ath6kl_sdio.ko:system/lib/modules/ath6kl/ath6kl_sdio.ko
+endif
 
 # The gps config appropriate for this device
 $(call inherit-product, device/common/gps/gps_us_supl.mk)
