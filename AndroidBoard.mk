@@ -1,8 +1,4 @@
-LOCAL_PATH := $(call my-dir)
-
-include $(CLEAR_VARS)
-
-ALL_PREBUILT += $(INSTALLED_KERNEL_TARGET)
+include device/qcom/msm7627a/AndroidBoard.mk
 
 # include the non-open-source counterpart to this file
 -include vendor/siragon/seattle/AndroidBoardVendor.mk
