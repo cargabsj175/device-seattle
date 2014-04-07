@@ -149,8 +149,6 @@ echo Adding \"$NAME\"
 DEVICE_LIBS="
 libaudioeq.so
 libauth.so
-libchromatix_s5k3h2y_default_video.so
-libchromatix_s5k3h2y_preview.so
 libchromatix_gc0339_default_video.so
 libchromatix_gc0339_preview.so
 libcm.so
@@ -194,7 +192,6 @@ libqmi_csvt_srvc.so
 libqmiservices.so
 libqueue.so
 libril-qc-1.so
-libril-qc-qmi-1.so
 libril-qcril-hook-oem.so
 libwms.so
 libwmsts.so
@@ -250,7 +247,6 @@ copy_files_to_obj_lib "$COMMON_OBJ_LIBS" ""
 
 DEVICE_BINS="
 abtfilt
-akmd8963
 amploader
 bridgemgrd
 fmconfig
