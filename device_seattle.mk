@@ -1,5 +1,13 @@
 include device/qcom/msm7627a/msm7627a.mk
 
+# init files
+PRODUCT_COPY_FILES := \
+  device/siragon/seattle/init/init.rc:root/init.rc \
+  device/siragon/seattle/init/init.target.rc:root/init.target.rc \
+  device/siragon/seattle/init/init.qcom.usb.rc:root/init.qcom.usb.rc \
+  device/siragon/seattle/init/ueventd.rc:root/ueventd.rc \
+  device/siragon/seattle/init/charger:root/charger
+
 # wifi modules
 ifneq (linux,$(HOST_OS))
 PRODUCT_COPY_FILES += \
@@ -16,7 +24,7 @@ DEVICE_PACKAGE_OVERLAYS += device/siragon/seattle/overlay
 
 LOCAL_PATH := device/siragon/seattle
 ifeq ($(TARGET_PREBUILT_KERNEL),)
-	LOCAL_KERNEL := $(LOCAL_PATH)/kernel
+	LOCAL_KERNEL := $(LOCAL_PATH)/prebuilt/kernel
 else
 	LOCAL_KERNEL := $(TARGET_PREBUILT_KERNEL)
 endif
