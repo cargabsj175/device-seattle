@@ -7,6 +7,9 @@ PRODUCT_COPY_FILES := \
   device/siragon/seattle/init/init.qcom.usb.rc:root/init.qcom.usb.rc \
   device/siragon/seattle/init/ueventd.rc:root/ueventd.rc \
   device/siragon/seattle/init/charger:root/charger
+  
+#blobs
+$(call inherit-product-if-exists, vendor/siragon/seattle/vendor-blobs.mk)
 
 # wifi modules
 ifneq (linux,$(HOST_OS))
