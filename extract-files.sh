@@ -151,6 +151,7 @@ libaudioeq.so
 libauth.so
 libchromatix_gc0339_default_video.so
 libchromatix_gc0339_preview.so
+libcnefeatureconfig.so
 libcm.so
 libcommondefs.so
 libdiag.so
