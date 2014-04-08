@@ -6,7 +6,12 @@ PRODUCT_COPY_FILES := \
   device/siragon/seattle/init/init.target.rc:root/init.target.rc \
   device/siragon/seattle/init/init.qcom.usb.rc:root/init.qcom.usb.rc \
   device/siragon/seattle/init/ueventd.rc:root/ueventd.rc \
-  device/siragon/seattle/init/charger:root/charger
+  device/siragon/seattle/init/charger:root/charger \
+  device/siragon/seattle/audio.conf:system/etc/bluetooth/audio.conf \
+  device/siragon/seattle/gps.conf:system/etc/gps.conf \
+  device/siragon/seattle/vold.fstab:system/etc/vold.fstab \
+  device/siragon/seattle/wpa_supplicant.conf:system/etc/wifi/wpa_supplicant.conf \
+  
   
 #blobs
 $(call inherit-product-if-exists, vendor/siragon/seattle/vendor-blobs.mk)
