@@ -42,6 +42,20 @@ PRODUCT_COPY_FILES += \
 
 $(call inherit-product, build/target/product/full.mk)
 
+# Mozilla properties
+PRODUCT_PROPERTY_OVERRIDES += \
+  ro.moz.ril.simstate_extra_field=true \
+  ro.moz.ril.emergency_by_default=true \
+  ro.moz.ril.extra_int_2nd_call=true \
+  sys.need.restart.rild=1 \
+  ro.moz.omx.hw.max_width=854 \
+  ro.moz.omx.hw.max_height=480 \
+  ro.moz.fm.noAnalog=true
+
+PRODUCT_PACKAGES += \
+  librecovery \
+  busybox
+
 PRODUCT_BUILD_PROP_OVERRIDES += BUILD_UTC_DATE=0
 PRODUCT_NAME := full_seattle
 PRODUCT_DEVICE := seattle
