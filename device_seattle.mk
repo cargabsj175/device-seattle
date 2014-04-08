@@ -10,7 +10,7 @@ PRODUCT_COPY_FILES := \
   device/siragon/seattle/audio.conf:system/etc/bluetooth/audio.conf \
   device/siragon/seattle/gps.conf:system/etc/gps.conf \
   device/siragon/seattle/vold.fstab:system/etc/vold.fstab \
-  device/siragon/seattle/wpa_supplicant.conf:system/etc/wifi/wpa_supplicant.conf \
+  device/siragon/seattle/wpa_supplicant.conf:system/etc/wifi/wpa_supplicant.conf
   
   
 #blobs
