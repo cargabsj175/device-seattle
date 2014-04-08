@@ -1,3 +1,4 @@
+import /init.b2g.rc
 on early-init
     # Set init and its forked children's oom_adj.
     write /proc/1/oom_adj -16
@@ -11,7 +12,7 @@ on init
 
 sysclktz 0
 
-loglevel 7
+loglevel 3
 
 # setup the global environment
     export PATH /sbin:/vendor/bin:/system/sbin:/system/bin:/system/xbin
@@ -21,13 +22,10 @@ loglevel 7
     export ANDROID_ASSETS /system/app
     export ANDROID_DATA /data
     export EXTERNAL_STORAGE /mnt/sdcard
-    export PHONE_ALBUM /mnt/phone_album
     export PHONE_STORAGE /mnt/emmc
-    export FAKE_STORAGE /mnt/fat
     export ASEC_MOUNTPOINT /mnt/asec
     export LOOP_MOUNTPOINT /mnt/obb
-    export BOOTCLASSPATH /system/framework/core.jar:/system/framework/core-junit.jar:/system/framework/bouncycastle.jar:/system/framework/ext.jar:/system/framework/framework.jar:/system/framework/android.policy.jar:/system/framework/services.jar:/system/framework/apache-xml.jar:/system/framework/filterfw.jar:/system/framework/com.qrd.plugin.feature_query.jar
-# important note for BOOTCLASSPATH, when you add new Jar in it, you must also add it into DEXPREOPT_BOOT_JARS(inside dex_preopt.mk), otherwise the PreDexOpt will work abnormally in user release.
+    export BOOTCLASSPATH /system/framework/core.jar:/system/framework/core-junit.jar:/system/framework/bouncycastle.jar:/system/framework/ext.jar:/system/framework/framework.jar:/system/framework/android.policy.jar:/system/framework/services.jar:/system/framework/apache-xml.jar:/system/framework/filterfw.jar
 
 # Backward compatibility
     symlink /system/etc /etc
@@ -40,9 +38,7 @@ loglevel 7
 # create mountpoints
     mkdir /mnt 0775 root system
     mkdir /mnt/sdcard 0000 system system
-    mkdir /mnt/phone_album 0000 system system
     mkdir /mnt/emmc 0000 system system
-    mkdir /mnt/fat 0000 system system
 
 # create USB host bus directory here so that libusbhost
 # can start monitoring.
@@ -61,9 +57,7 @@ loglevel 7
 
 # Backwards Compat - XXX: Going away in G*
     symlink /mnt/sdcard /sdcard
-    symlink /mnt/phone_album /phone_album
     symlink /mnt/emmc /emmc
-    symlink /mnt/fat /fat
 
     mkdir /system
     mkdir /data 0771 system system
@@ -131,6 +125,9 @@ on fs
 # mount mtd partitions
     # Mount /system rw first to give the filesystem a chance to save a checkpoint
     mount yaffs2 mtd@system /system
+    chmod 0755 /system/b2g/b2g
+    chmod 0755 /system/b2g/plugin-container
+    chmod 0755 /system/b2g/updater
     mount yaffs2 mtd@system /system ro remount
     mount yaffs2 mtd@userdata /data nosuid nodev
     mount yaffs2 mtd@persist /persist nosuid nodev
@@ -141,9 +138,12 @@ on emmc-fs
 # mount mmc partitions
     wait /dev/block/mmcblk0p12
     mount ext4 /dev/block/mmcblk0p12 /system rw barrier=1
+    chmod 0755 /system/b2g/b2g
+    chmod 0755 /system/b2g/plugin-container
+    chmod 0755 /system/b2g/updater
     wait /dev/block/mmcblk0p13
-    exec /system/bin/e2fsck -y /dev/block/mmcblk0p13
-    mount ext4 /dev/block/mmcblk0p13 /data nosuid nodev barrier=1 noauto_da_alloc
+    exec /system/bin/e2fsck -p /dev/block/mmcblk0p13
+    mount ext4 /dev/block/mmcblk0p13 /data nosuid nodev rw barrier=1 noauto_da_alloc
     mount ext4 /dev/block/mmcblk0p14 /persist nosuid nodev barrier=1
     mount ext4 /dev/block/mmcblk0p15 /cache nosuid nodev barrier=1
 
@@ -153,11 +153,11 @@ on post-fs
 
     # We chown/chmod /cache again so because mount is run as root + defaults
     chown system cache /cache
-    chmod 0771 /cache
+    chmod 0770 /cache
 
     # This may have been created by the recovery system with odd permissions
     chown system cache /cache/recovery
-    chmod 0775 /cache/recovery
+    chmod 0770 /cache/recovery
 
     #change permissions on vmallocinfo so we can grab it from bugreports
     chown root log /proc/vmallocinfo
@@ -169,14 +169,8 @@ on post-fs
     chown root system /proc/sysrq-trigger
     chmod 0220 /proc/sysrq-trigger
 
-    #change permission for cdrom
-    chmod 0555 /system/etc/init.qcom.usbcdrom.sh
-
     # create the lost+found directories, so as to enforce our permissions
     mkdir /cache/lost+found 0770 root root
-
-	# create the fota directories to store delta update packages
-	mkdir /cache/fota 0777 system cache
 
 on post-fs-data
     # We chown/chmod /data again so because mount is run as root + defaults
@@ -210,6 +204,7 @@ on post-fs-data
     mkdir /data/misc/keychain 0771 system system
     mkdir /data/misc/vpn 0770 system vpn
     mkdir /data/misc/systemkeys 0700 system system
+    mkdir /data/misc/sensors 0775 system system
     # give system access to wpa_supplicant.conf for backup and restore
     mkdir /data/misc/wifi 0770 wifi wifi
     chmod 0660 /data/misc/wifi/wpa_supplicant.conf
@@ -301,6 +296,7 @@ on boot
     chown system system /sys/class/leds/red/brightness
     chown system system /sys/class/leds/green/brightness
     chown system system /sys/class/leds/blue/brightness
+    chown system system /sys/class/leds/amber/brightness
     chown system system /sys/class/leds/red/blink
     chown system system /sys/class/leds/green/blink
     chown system system /sys/class/leds/blue/blink
@@ -370,26 +366,6 @@ on boot
 
 on nonencrypted
     class_start late_start
-
-service rpcap_to_sd /system/bin/sh /system/etc/init.qcom.savepcap.sh rmnet0
-    disabled
-
-on property:persist.debug.svrmnetpcap=1
-    start rpcap_to_sd
-    oneshot
-
-on property:persist.debug.svrmnetpcap=0
-    stop rpcap_to_sd
-
-service wpcap_to_sd /system/bin/sh /system/etc/init.qcom.savepcap.sh wlan0
-    disabled
-
-on property:persist.debug.svwlanpcap=1
-    start wpcap_to_sd
-    oneshot
-
-on property:persist.debug.svwlanpcap=0
-    stop wpcap_to_sd
 
 on charger
     class_start charger
@@ -471,18 +447,6 @@ service console /system/bin/sh
     user shell
     group log
 
-service perfman_init /system/bin/perfman_init
-    class core
-    user root
-    group root
-    oneshot
-
-service memopt_init /system/bin/memopt_init
-    class core
-    user root
-    group root
-    oneshot
-
 # adbd is controlled via property triggers in init.<platform>.usb.rc
 service adbd /sbin/adbd
     class core
@@ -509,9 +473,7 @@ service servicemanager /system/bin/servicemanager
     user system
     group system
     critical
-    onrestart restart zygote
     onrestart restart media
-    onrestart restart surfaceflinger
     onrestart restart drm
 
 service vold /system/bin/vold
@@ -534,20 +496,6 @@ service ril-daemon /system/bin/rild
     user root
     group radio cache inet misc audio sdcard_rw qcom_oncrpc diag
 
-service surfaceflinger /system/bin/surfaceflinger
-    class main
-    user system
-    group graphics
-    onrestart restart zygote
-
-service zygote /system/bin/app_process -Xzygote /system/bin --zygote --start-system-server
-    class main
-    socket zygote stream 660 root system
-    onrestart write /sys/android_power/request_state wake
-    onrestart write /sys/power/state on
-    onrestart restart media
-    onrestart restart netd
-
 service drm /system/bin/drmserver
     class main
     user drm
@@ -562,14 +510,9 @@ service media /system/bin/mediaserver
 service bootanim /system/bin/bootanimation
     class main
     user graphics
-    group graphics system audio qcom_oncrpc
+    group graphics
     disabled
-    oneshot
 
-service baseinit /system/bin/baseinit
-    class main
-    user root
-    group root
     oneshot
 
 service dbus /system/bin/dbus-daemon --system --nofork
@@ -616,11 +559,6 @@ service keystore /system/bin/keystore /data/misc/keystore
     user keystore
     group keystore
     socket keystore stream 666
-
-service usbcdromd /system/bin/sh /system/etc/init.qcom.usbcdrom.sh
-	class main
-	group system
-	oneshot
 
 service dumpstate /system/bin/dumpstate -s
     class main
