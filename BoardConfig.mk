@@ -3,6 +3,20 @@ USE_CAMERA_STUB := true
 # inherit from the proprietary version
 -include vendor/siragon/seattle/BoardConfigVendor.mk
 
+#Optimizations
+COMMON_GLOBAL_CFLAGS += -DREFRESH_RATE=60
+COMMON_GLOBAL_CFLAGS += -DMISSING_GRALLOC_BUFFERS
+TARGET_GLOBAL_CFLAGS += -mfpu=neon -mfloat-abi=softfp
+TARGET_GLOBAL_CPPFLAGS += -mfpu=neon -mfloat-abi=softfp
+TARGET_HAVE_TSLIB := true
+ARCH_ARM_HAVE_NEON := true
+TARGET_USES_OVERLAY := false
+TARGET_HAVE_BYPASS  := false
+TARGET_USES_C2D_COMPOSITION := false
+TARGET_QCOM_HDMI_OUT := false
+BOARD_USE_SKIA_LCDTEXT := true
+USE_OPENGL_RENDERER := true
+
 TARGET_ARCH := arm
 TARGET_NO_BOOTLOADER := true
 TARGET_BOARD_PLATFORM := unknown
